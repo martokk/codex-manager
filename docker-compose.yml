@@ -1,12 +1,12 @@
 version: "3.9"
 
 services:
-  context_manager:
-    container_name: "context_manager"
-    image: ghcr.io/martokk/context_manager:latest
+  codex_manager:
+    container_name: "codex_manager"
+    image: ghcr.io/martokk/codex_manager:latest
     restart: unless-stopped
     volumes:
-      # - /home/ubuntu/volumes/context_manager/data:/context_manager/data
+      # - /home/ubuntu/volumes/codex_manager/data:/codex_manager/data
       - ./app:/app
     ports:
       - "5000:5000"

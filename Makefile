@@ -4,8 +4,8 @@ PYTHON := python
 PWD := `pwd`
 
 #* Docker variables
-PROJECT := context_manager
-PROJECT_TITLE := context-manager
+PROJECT := codex_manager
+PROJECT_TITLE := codex-manager
 VERSION := latest
 PYINSTALLER_ENTRY := $(PROJECT)/__main__.py
 
