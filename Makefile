@@ -4,8 +4,8 @@ PYTHON := python
 PWD := `pwd`
 
 #* Docker variables
-PROJECT := python_fastapi_stack
-PROJECT_TITLE := Python FastAPI Stack
+PROJECT := context_manager
+PROJECT_TITLE := context-manager
 VERSION := latest
 PYINSTALLER_ENTRY := $(PROJECT)/__main__.py
 

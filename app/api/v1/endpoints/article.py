@@ -5,11 +5,11 @@ from app import crud, models
 from app.api import deps
 
 router = APIRouter()
-ModelClass = models.Video
-ModelReadClass = models.VideoRead
-ModelCreateClass = models.VideoCreate
-ModelUpdateClass = models.VideoUpdate
-model_crud = crud.video
+ModelClass = models.Article
+ModelReadClass = models.ArticleRead
+ModelCreateClass = models.ArticleCreate
+ModelUpdateClass = models.ArticleUpdate
+model_crud = crud.article
 
 
 @router.post("/", response_model=ModelReadClass, status_code=status.HTTP_201_CREATED)
@@ -20,7 +20,7 @@ async def create_with_uploader_id(
     current_active_user: models.User = Depends(deps.get_current_active_user),
 ) -> ModelClass:
     """
-    Create a new video.
+    Create a new article.
 
     Args:
         obj_in (ModelCreateClass): object to be created.
@@ -38,7 +38,7 @@ async def create_with_uploader_id(
             db=db, obj_in=obj_in, owner_id=current_active_user.id
         )
     except crud.RecordAlreadyExistsError as exc:
-        raise HTTPException(status_code=status.HTTP_200_OK, detail="Video already exists") from exc
+        raise HTTPException(status_code=status.HTTP_200_OK, detail="Article already exists") from exc
 
 
 @router.get("/{id}", response_model=ModelReadClass)
@@ -49,10 +49,10 @@ async def get(
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> ModelClass:
     """
-    Retrieve a video by id.
+    Retrieve a article by id.
 
     Args:
-        id (str): id of the video.
+        id (str): id of the article.
         db (Session): database session.
         current_user (Any): authenticated user.
 
@@ -63,13 +63,13 @@ async def get(
         HTTPException: if object does not exist.
         HTTPException: if user is not superuser and object does not belong to user.
     """
-    video = await model_crud.get_or_none(id=id, db=db)
-    if video:
-        if crud.user.is_superuser(user_=current_user) or video.owner_id == current_user.id:
-            return video
+    article = await model_crud.get_or_none(id=id, db=db)
+    if article:
+        if crud.user.is_superuser(user_=current_user) or article.owner_id == current_user.id:
+            return article
 
     elif crud.user.is_superuser(user_=current_user):
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Video not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Article not found")
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
 
 
@@ -82,12 +82,12 @@ async def get_multi(
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> list[ModelClass]:
     """
-    Retrieve videos.
+    Retrieve articles.
 
     Args:
         db (Session): database session.
-        skip (int): Number of videos to skip. Defaults to 0.
-        limit (int): Number of videos to return. Defaults to 100.
+        skip (int): Number of articles to skip. Defaults to 0.
+        limit (int): Number of articles to return. Defaults to 100.
         current_user (models.User): Current active user.
 
     Returns:
@@ -111,10 +111,10 @@ async def update(
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> ModelClass:
     """
-    Update an video.
+    Update an article.
 
     Args:
-        id (str): ID of the video to update.
+        id (str): ID of the article to update.
         obj_in (ModelUpdateClass): object to update.
         db (Session): database session.
         current_user (Any): authenticated user.
@@ -125,13 +125,13 @@ async def update(
     Raises:
         HTTPException: if object not found.
     """
-    video = await model_crud.get_or_none(id=id, db=db)
-    if video:
-        if crud.user.is_superuser(user_=current_user) or video.owner_id == current_user.id:
+    article = await model_crud.get_or_none(id=id, db=db)
+    if article:
+        if crud.user.is_superuser(user_=current_user) or article.owner_id == current_user.id:
             return await model_crud.update(db=db, obj_in=obj_in, id=id)
 
     elif crud.user.is_superuser(user_=current_user):
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Video not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Article not found")
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
 
 
@@ -143,10 +143,10 @@ async def delete(
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> None:
     """
-    Delete an video.
+    Delete an article.
 
     Args:
-        id (str): ID of the video to delete.
+        id (str): ID of the article to delete.
         db (Session): database session.
         current_user (models.User): authenticated user.
 
@@ -154,14 +154,14 @@ async def delete(
         None
 
     Raises:
-        HTTPException: if video not found.
+        HTTPException: if article not found.
     """
 
-    video = await model_crud.get_or_none(id=id, db=db)
-    if video:
-        if crud.user.is_superuser(user_=current_user) or video.owner_id == current_user.id:
+    article = await model_crud.get_or_none(id=id, db=db)
+    if article:
+        if crud.user.is_superuser(user_=current_user) or article.owner_id == current_user.id:
             return await model_crud.remove(id=id, db=db)
 
     elif crud.user.is_superuser(user_=current_user):
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Video not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Article not found")
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
