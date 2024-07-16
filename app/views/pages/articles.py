@@ -246,7 +246,12 @@ async def handle_edit_article(
     alerts.success.append("Article updated")
     return templates.TemplateResponse(
         "article/edit.html",
-        {"request": request, "article": new_article, "current_user": current_user, "alerts": alerts},
+        {
+            "request": request,
+            "article": new_article,
+            "current_user": current_user,
+            "alerts": alerts,
+        },
     )
 
 

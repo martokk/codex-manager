@@ -38,7 +38,9 @@ async def create_with_uploader_id(
             db=db, obj_in=obj_in, owner_id=current_active_user.id
         )
     except crud.RecordAlreadyExistsError as exc:
-        raise HTTPException(status_code=status.HTTP_200_OK, detail="Article already exists") from exc
+        raise HTTPException(
+            status_code=status.HTTP_200_OK, detail="Article already exists"
+        ) from exc
 
 
 @router.get("/{id}", response_model=ModelReadClass)
