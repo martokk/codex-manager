@@ -1,0 +1,57 @@
+{% extends "base/base.html" %}
+
+{% block title %}Edit Custom Codex{% endblock %}
+
+{% block content_header %}Edit Custom Codex{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            Custom Codex Details
+        </div>
+        <div class="card-body p-4">
+            <form method="POST">
+                <div class="form-group">
+                    <label for="id">Id:</label>
+                    <input type="text" class="form-control mb-3" id="id" name="id" value="{{ custom_codex.id }}"
+                        disabled>
+                </div>
+
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" class="form-control mb-3" id="name" name="name" value="{{ custom_codex.name }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="context_length">Context Length:</label>
+                    <input type="number" class="form-control mb-3" id="context_length" name="context_length"
+                        value="{{ custom_codex.context_length }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="year_start">Start Year:</label>
+                    <input type="number" class="form-control mb-3" id="year_start" name="year_start"
+                        value="{{ custom_codex.year_start }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="year_end">End Year:</label>
+                    <input type="number" class="form-control mb-3" id="year_end" name="year_end"
+                        value="{{ custom_codex.year_end }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="tags">Tags:</label>
+                    <input type="text" class="form-control mb-3" id="tags" name="tags"
+                        value="{{ custom_codex.tags|join(',') }}">
+                </div>
+
+                <div class="d-flex justify-content-end mt-3">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock content %}

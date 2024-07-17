@@ -1,9 +1,11 @@
+from typing import Optional
 from fastapi import APIRouter, Depends, Form, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from sqlmodel import Session
 
 from app import crud, models
 from app.views import deps, templates
+from app.services.articles import import_articles_from_worldanvil
 
 router = APIRouter()
 
@@ -104,28 +106,53 @@ async def view_article(
     )
 
 
-@router.get("/articles/create", response_class=HTMLResponse)
-async def create_article(
-    request: Request,
-    current_user: models.User = Depends(  # pylint: disable=unused-argument
-        deps.get_current_active_user
-    ),
+@router.post("/articles/create", response_class=HTMLResponse, status_code=status.HTTP_201_CREATED)
+async def handle_create_article(
+    title: str = Form(...),
+    description: str = Form(None),
+    url: str = Form(...),
+    year_start: Optional[int] = Form(None),
+    year_end: Optional[int] = Form(None),
+    tags: str = Form(None),
+    text: Optional[str] = Form(None),
+    summary: Optional[str] = Form(None),
+    brief: Optional[str] = Form(None),
+    db: Session = Depends(deps.get_db),
+    current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Response:
     """
-    New Article form.
-
-    Args:
-        request(Request): The request object
-        current_user(User): The authenticated user.
-
-    Returns:
-        Response: Form to create a new article
+    Handles the creation of a new article.
     """
-    alerts = models.Alerts().from_cookies(request.cookies)
-    return templates.TemplateResponse(
-        "article/create.html",
-        {"request": request, "current_user": current_user, "alerts": alerts},
+    alerts = models.Alerts()
+
+    # Convert tags string to list
+    tags_list = [tag.strip() for tag in tags.split(",")] if tags else None
+
+    article_create = models.ArticleCreate(
+        title=title,
+        description=description,
+        url=url,
+        year_start=year_start,
+        year_end=year_end,
+        tags=tags_list,
+        text=text,
+        summary=summary,
+        brief=brief,
+        owner_id=current_user.id,
     )
+    try:
+        await crud.article.create(db=db, obj_in=article_create)
+    except crud.RecordAlreadyExistsError:
+        alerts.danger.append("Article already exists")
+        response = RedirectResponse("/articles/create", status_code=status.HTTP_302_FOUND)
+        response.set_cookie(key="alerts", value=alerts.json(), httponly=True, max_age=5)
+        return response
+
+    alerts.success.append("Article successfully created")
+    response = RedirectResponse(url="/articles", status_code=status.HTTP_303_SEE_OTHER)
+    response.headers["Method"] = "GET"
+    response.set_cookie(key="alerts", value=alerts.json(), httponly=True, max_age=5)
+    return response
 
 
 @router.post("/articles/create", response_class=HTMLResponse, status_code=status.HTTP_201_CREATED)
@@ -210,30 +237,33 @@ async def handle_edit_article(
     request: Request,
     article_id: str,
     title: str = Form(...),
-    description: str = Form(...),
+    description: str = Form(None),
     url: str = Form(...),
+    year_start: Optional[int] = Form(None),
+    year_end: Optional[int] = Form(None),
+    tags: str = Form(None),
+    text: Optional[str] = Form(None),
+    summary: Optional[str] = Form(None),
+    brief: Optional[str] = Form(None),
     db: Session = Depends(deps.get_db),
-    current_user: models.User = Depends(  # pylint: disable=unused-argument
-        deps.get_current_active_user
-    ),
+    current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Response:
     """
-    Handles the creation of a new article.
-
-    Args:
-        request(Request): The request object
-        article_id(str): The article id
-        title(str): The title of the article
-        description(str): The description of the article
-        url(str): The url of the article
-        db(Session): The database session.
-        current_user(User): The authenticated user.
-
-    Returns:
-        Response: View of the newly created article
+    Handles the editing of an article.
     """
     alerts = models.Alerts()
-    article_update = models.ArticleUpdate(title=title, description=description, url=url)
+    tags_list = [tag.strip() for tag in tags.split(",")] if tags else None
+    article_update = models.ArticleUpdate(
+        title=title,
+        description=description,
+        url=url,
+        year_start=year_start,
+        year_end=year_end,
+        tags=tags_list,
+        text=text,
+        summary=summary,
+        brief=brief,
+    )
 
     try:
         new_article = await crud.article.update(db=db, obj_in=article_update, id=article_id)
@@ -282,6 +312,26 @@ async def delete_article(
         alerts.danger.append("Article not found")
     except crud.DeleteError:
         alerts.danger.append("Error deleting article")
+
+    response = RedirectResponse(url="/articles", status_code=status.HTTP_303_SEE_OTHER)
+    response.set_cookie(key="alerts", value=alerts.json(), max_age=5, httponly=True)
+    return response
+
+
+@router.post("/import-articles", response_class=HTMLResponse)
+async def import_articles(
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user: models.User = Depends(deps.get_current_active_user),
+) -> Response:
+    """
+    Imports articles from World Anvil
+    """
+    alerts = models.Alerts()
+
+    import_articles_from_worldanvil()
+
+    alerts.success.append("Article's Imported from World Anvil.")
 
     response = RedirectResponse(url="/articles", status_code=status.HTTP_303_SEE_OTHER)
     response.set_cookie(key="alerts", value=alerts.json(), max_age=5, httponly=True)

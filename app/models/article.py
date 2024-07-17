@@ -1,12 +1,8 @@
-from typing import TYPE_CHECKING, Any
-
-import datetime
-
+from typing import TYPE_CHECKING, Optional, List, Any
+from datetime import datetime
 from pydantic import root_validator
 from sqlmodel import Field, Relationship, SQLModel
-
 from app.core.uuid import generate_uuid_from_url
-
 from .common import TimestampModel
 
 if TYPE_CHECKING:
@@ -16,13 +12,19 @@ if TYPE_CHECKING:
 class ArticleBase(TimestampModel, SQLModel):
     id: str = Field(default=None, primary_key=True, nullable=False)
     title: str = Field(default=None)
-    description: str = Field(default=None)
-    url: str = Field(default=None)
     owner_id: str = Field(foreign_key="user.id", nullable=False, default=None)
+    year_start: Optional[int] = Field(default=None)
+    year_end: Optional[int] = Field(default=None)
+    tags: Optional[List[str]] = Field(default_factory=list)
+    text: Optional[str] = Field(default=None)
+    summary: Optional[str] = Field(default=None)
+    brief: Optional[str] = Field(default=None)
 
 
 class Article(ArticleBase, table=True):
     owner: "User" = Relationship(back_populates="articles")
+    custom_codex_articles: List["CustomCodexArticle"] = Relationship(back_populates="article")
+    reviews: List["Review"] = Relationship(back_populates="article")
 
 
 class ArticleCreate(ArticleBase):
@@ -35,7 +37,7 @@ class ArticleCreate(ArticleBase):
             **values,
             "url": sanitized_url,
             "id": values.get("id", article_uuid),
-            "updated_at": datetime.datetime.now(tz=datetime.timezone.utc),
+            "updated_at": datetime.utcnow(),
         }
 
 

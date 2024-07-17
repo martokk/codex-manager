@@ -1,0 +1,52 @@
+{% extends "base/base.html" %}
+
+{% block title %}Custom Codex Articles ({{ custom_codex_articles|length }}){% endblock %}
+
+{% block content_header %}Custom Codex Articles for {{ custom_codex.name }} ({{ custom_codex_articles|length }}){%
+endblock %}
+
+{% block content %}
+<div class="container">
+    <a href="/custom_codex/{{ custom_codex.id }}/articles/create" class="btn btn-primary mb-3">Add Article to Codex</a>
+    <table class="table table-hover table-sm">
+        <thead>
+            <tr>
+                <th scope="col" class="w-50">Article</th>
+                <th scope="col" class="d-none d-md-table-cell w-25">Type</th>
+                <th scope="col" class="w-auto"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for custom_codex_article in custom_codex_articles %}
+            <tr>
+                <td class="">
+                    <a href="/custom_codex/{{ custom_codex.id }}/article/{{ custom_codex_article.article_id }}"
+                        class="">{{ custom_codex_article.article.title }}</a>
+                </td>
+                <td class="">{{ custom_codex_article.article_type }}</td>
+                <td class="">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-dark btn-transparent dropdown-toggle"
+                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right p-1">
+                            <a class="dropdown-item p-2"
+                                href="/custom_codex/{{ custom_codex.id }}/article/{{ custom_codex_article.article_id }}/edit">Edit</a>
+                            <a class="dropdown-item p-2" href="#"
+                                onclick="confirmDelete('/custom_codex/{{ custom_codex.id }}/article/{{ custom_codex_article.article_id }}/delete')">Delete</a>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<script>
+    function confirmDelete(url) {
+        if (confirm("Are you sure you want to remove this article from the codex?")) {
+            window.location.href = url;
+        }
+    }
+</script>
+{% endblock %}

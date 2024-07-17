@@ -50,6 +50,8 @@ pydantic = "^1.10.4"
 sqlmodel = "^0.0.8"
 types-pyyaml = "^6.0.12.8"
 types-attrs = "^19.1.0"
+beautifulsoup4 = "^4.12.3"
+html2text = "^2024.2.26"
 
 
 [tool.poetry.group.dev.dependencies]

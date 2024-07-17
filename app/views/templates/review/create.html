@@ -1,0 +1,48 @@
+{% extends "base/base.html" %}
+
+{% block title %}Create New Review{% endblock %}
+
+{% block content_header %}Create New Review{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="card">
+        <div class="card-body">
+            <form method="POST">
+                <div class="form-group">
+                    <label for="article_id">Article:</label>
+                    <select class="form-control" id="article_id" name="article_id">
+                        {% for article in articles %}
+                        <option value="{{ article.id }}">{{ article.title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group mt-3">
+                    <label for="old_summary">Old Summary:</label>
+                    <textarea class="form-control" id="old_summary" name="old_summary" rows="3"></textarea>
+                </div>
+
+                <div class="form-group mt-3">
+                    <label for="new_summary">New Summary:</label>
+                    <textarea class="form-control" id="new_summary" name="new_summary" rows="3"></textarea>
+                </div>
+
+                <div class="form-group mt-3">
+                    <label for="old_brief">Old Brief:</label>
+                    <textarea class="form-control" id="old_brief" name="old_brief" rows="3"></textarea>
+                </div>
+
+                <div class="form-group mt-3">
+                    <label for="new_brief">New Brief:</label>
+                    <textarea class="form-control" id="new_brief" name="new_brief" rows="3"></textarea>
+                </div>
+
+                <div class="d-flex justify-content-end mt-3">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock content %}

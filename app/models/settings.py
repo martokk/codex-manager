@@ -61,3 +61,7 @@ class Settings(BaseSettings):
     PACKAGE_NAME: str = PROJECT_NAME.lower().replace("-", "_").replace(" ", "_")
     PROJECT_DESCRIPTION: str = f"{PROJECT_NAME}"
     VERSION: str = ""
+
+    # World Anvil
+    WORLDANVIL_USERNAME: str = ""
+    WORLDANVIL_PASSWORD: str = ""
