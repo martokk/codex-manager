@@ -4,7 +4,7 @@ from sqlalchemy import select as sa_select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql.elements import BinaryExpression
 from sqlalchemy.sql.expression import func
-from sqlmodel import Session, SQLModel, select
+from sqlmodel import Session, SQLModel, select, asc
 
 from app.crud.exceptions import DeleteError, RecordAlreadyExistsError, RecordNotFoundError
 
@@ -23,17 +23,18 @@ class BaseCRUD(Generic[ModelType, ModelCreateType, ModelUpdateType]):
         """
         self.model = model
 
-    async def get_all(self, db: Session) -> list[ModelType]:
+    async def get_all(self, db: Session, sort_by: str = "id") -> list[ModelType]:
         """
-        Get all records for the model.
+        Get all records for the model, sorted by the specified field.
 
         Args:
             db (Session): The database session.
+            sort_by (str): The field to sort by. Defaults to "id".
 
         Returns:
-            A list of all records, or None if there are none.
+            A list of all records sorted by the specified field, or an empty list if there are none.
         """
-        statement = select(self.model)
+        statement = select(self.model).order_by(asc(getattr(self.model, sort_by)))
         return db.exec(statement).all() or []
 
     async def get(self, *args: BinaryExpression[Any], db: Session, **kwargs: Any) -> ModelType:
@@ -125,9 +126,7 @@ class BaseCRUD(Generic[ModelType, ModelCreateType, ModelUpdateType]):
         try:
             db.commit()
         except IntegrityError as exc:
-            raise RecordAlreadyExistsError(
-                f"{self.model.__name__}({obj_in=}) already exists in database"
-            ) from exc
+            raise exc
         db.refresh(out_obj)
         return out_obj
 

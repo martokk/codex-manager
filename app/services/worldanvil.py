@@ -1,10 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
-import html2text
 from typing import Dict, List, Optional, Any
-from functools import partial
-from app import logger
 import re
+from app import settings, logger
 
 
 def login_to_worldanvil(
@@ -32,10 +30,16 @@ def login_to_worldanvil(
 def get_export_content(session: requests.Session, export_url: str) -> Optional[str]:
     response = session.get(export_url)
     if response.ok:
-        return response.text
+        return str(response.text)
     else:
-        logging.error(f"Failed to get export content. Status code: {response.status_code}")
         return None
+
+
+def extract_article_id(soup: BeautifulSoup) -> str:
+    article_div = soup.find("div", class_="article-print-container")
+    if not article_div or "id" not in article_div.attrs:
+        raise
+    return str(article_div["id"]).replace("article-", "")
 
 
 def clean_title(title: str) -> str:
@@ -54,12 +58,12 @@ def extract_title(soup: BeautifulSoup) -> str:
 def extract_content(soup: BeautifulSoup) -> str:
     """Extract the main content from the article HTML."""
     content_div = soup.find("div", class_="article-content-left")
-    return content_div.get_text(separator="\n", strip=True) if content_div else ""
+    return str(content_div.get_text(separator="\n", strip=True)) if content_div else ""
 
 
-def extract_tags(soup: BeautifulSoup) -> list:
+def extract_tags(soup: BeautifulSoup) -> list[str]:
     """Extract tags from the article HTML."""
-    tags = []
+    tags: list[str] = []
 
     # Look for the metadata div
     metadata_div = soup.find("div", id="metadata")
@@ -80,24 +84,67 @@ def extract_tags(soup: BeautifulSoup) -> list:
     return tags
 
 
-def parse_single_article(article_html: str) -> dict:
+def extract_template(soup: BeautifulSoup) -> Optional[str]:
+    """Extract the article template from the article HTML."""
+    metadata_div = soup.find("div", id="metadata")
+    if metadata_div:
+        template_row = metadata_div.find(
+            "div",
+            lambda tag: tag.name == "div" and tag.find("div", string="Article template"),
+            class_="row",
+        )
+        if template_row:
+            template_value = template_row.find("div", class_="metadata-value")
+            if template_value:
+                return template_value.text.strip()
+    return None
+
+
+def extract_category(soup: BeautifulSoup) -> Optional[str]:
+    """Extract the category from the article HTML."""
+    metadata_div = soup.find("div", id="metadata")
+    if not metadata_div:
+        return None
+
+    category_label = metadata_div.find("div", class_="metadata-label", string="Category")
+    if category_label:
+        category_value = category_label.find_next("div", class_="metadata-value")
+        if category_value:
+            category_link = category_value.find("a")
+            if category_link:
+                return category_link.text.strip()
+
+    return None
+
+
+def parse_single_article(article_html: str) -> dict[str, Any]:
     """Parse a single article from its HTML content."""
     soup = BeautifulSoup(article_html, "lxml")
 
+    id_ = extract_article_id(soup)
     title = extract_title(soup)
     content = extract_content(soup)
     tags = extract_tags(soup)
+    category = extract_category(soup)
+    template = extract_template(soup)
 
-    return {"title": title, "content": content, "tags": tags}
+    return {
+        "id": id_,
+        "title": title,
+        "content": content,
+        "tags": tags,
+        "category": category,
+        "template": template,
+    }
 
 
-def split_articles(full_html: str) -> list:
+def split_articles(full_html: str) -> list[Any]:
     """Split the full HTML into individual article chunks."""
     soup = BeautifulSoup(full_html, "lxml")
-    return soup.find_all("div", class_="article-print-container")
+    return list(soup.find_all("div", class_="article-print-container"))
 
 
-def get_articles_from_html(html_content: str) -> list:
+def get_articles_from_html(html_content: str) -> list[Any]:
     """Import all articles from the full HTML content."""
     article_divs = split_articles(html_content)
     return [parse_single_article(str(article_div)) for article_div in article_divs]
@@ -116,3 +163,12 @@ def import_articles(username: str, password: str, export_url: str) -> List[Dict[
         articles = get_articles_from_html(html_content)
 
         return articles
+
+
+def get_articles_from_worldanvil() -> List[Dict[str, Any]]:
+    """Login to WorldAnvil and retrieve all articles"""
+    export_url = "https://www.worldanvil.com/world/ancient-sol-tv76/export"
+    username = settings.WORLDANVIL_USERNAME
+    password = settings.WORLDANVIL_PASSWORD
+
+    return import_articles(username=username, password=password, export_url=export_url)

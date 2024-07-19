@@ -16,10 +16,12 @@
     <table class="table table-hover table-sm">
         <thead>
             <tr>
-                <th scope="col" class="w-25">Title</th>
-                <th scope="col" class="d-none d-md-table-cell w-25">Year Range</th>
-                <th scope="col" class="d-none d-md-table-cell w-25">Tags</th>
-                <th scope="col" class="w-auto"></th>
+                <th scope="col" class="w-20">Title</th>
+                <th scope="col" class="d-none d-md-table-cell w-15">Year Range</th>
+                <th scope="col" class="d-none d-md-table-cell w-20">Tags</th>
+                <th scope="col" class="d-none d-md-table-cell w-15">Category</th>
+                <th scope="col" class="d-none d-md-table-cell w-15">Template</th>
+                <th scope="col" class="w-15"></th>
             </tr>
         </thead>
         <tbody>
@@ -43,6 +45,12 @@
                     {% else %}
                     No tags
                     {% endif %}
+                </td>
+                <td class="d-none d-md-table-cell">
+                    {{ article.category if article.category else 'N/A' }}
+                </td>
+                <td class="d-none d-md-table-cell">
+                    {{ article.template if article.template else 'N/A' }}
                 </td>
                 <td class="">
                     <div class="btn-group">

@@ -33,7 +33,7 @@ async def list_articles(
     # Get alerts dict from cookies
     alerts = models.Alerts().from_cookies(request.cookies)
 
-    articles = await crud.article.get_multi(db=db, owner_id=current_user.id)
+    articles = await crud.article.get_all(db=db, sort_by="title")
     return templates.TemplateResponse(
         "article/list.html",
         {"request": request, "articles": articles, "current_user": current_user, "alerts": alerts},
@@ -63,7 +63,7 @@ async def list_all_articles(
     # Get alerts dict from cookies
     alerts = models.Alerts().from_cookies(request.cookies)
 
-    articles = await crud.article.get_all(db=db)
+    articles = await crud.article.get_all(db=db, sort_by="title")
     return templates.TemplateResponse(
         "article/list.html",
         {"request": request, "articles": articles, "current_user": current_user, "alerts": alerts},
@@ -138,7 +138,6 @@ async def handle_create_article(
         text=text,
         summary=summary,
         brief=brief,
-        owner_id=current_user.id,
     )
     try:
         await crud.article.create(db=db, obj_in=article_create)
@@ -329,7 +328,7 @@ async def import_articles(
     """
     alerts = models.Alerts()
 
-    import_articles_from_worldanvil()
+    await import_articles_from_worldanvil()
 
     alerts.success.append("Article's Imported from World Anvil.")
 
