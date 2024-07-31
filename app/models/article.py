@@ -41,6 +41,8 @@ class ArticleUpdate(SQLModel):
     title: Optional[str] = None
     text: Optional[str] = None
     tags: Optional[List[str]] = None
+    summary: Optional[str] = Field(default=None)
+    brief: Optional[str] = Field(default=None)
     year_start: Optional[int] = None
     year_end: Optional[int] = None
     category: Optional[str] = None

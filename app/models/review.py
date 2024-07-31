@@ -21,6 +21,10 @@ class ReviewBase(TimestampModel, SQLModel):
     new_summary: Optional[str] = Field(default=None)
     old_brief: Optional[str] = Field(default=None)
     new_brief: Optional[str] = Field(default=None)
+    old_year_start: Optional[int] = Field(default=None)
+    new_year_start: Optional[int] = Field(default=None)
+    old_year_end: Optional[int] = Field(default=None)
+    new_year_end: Optional[int] = Field(default=None)
 
 
 class Review(ReviewBase, table=True):
