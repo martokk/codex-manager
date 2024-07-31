@@ -65,3 +65,6 @@ class Settings(BaseSettings):
     # World Anvil
     WORLDANVIL_USERNAME: str = ""
     WORLDANVIL_PASSWORD: str = ""
+
+    # AI API Keys
+    ANTHROPIC_API_KEY: str = ""

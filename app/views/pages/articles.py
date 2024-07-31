@@ -5,7 +5,7 @@ from sqlmodel import Session
 
 from app import crud, models
 from app.views import deps, templates
-from app.services.articles import import_articles_from_worldanvil
+from app.services.articles import generate_new_article_summary, import_articles_from_worldanvil
 
 router = APIRouter()
 
@@ -333,5 +333,37 @@ async def import_articles(
     alerts.success.append("Article's Imported from World Anvil.")
 
     response = RedirectResponse(url="/articles", status_code=status.HTTP_303_SEE_OTHER)
+    response.set_cookie(key="alerts", value=alerts.json(), max_age=5, httponly=True)
+    return response
+
+
+@router.get("/article/{article_id}/generate-summary", response_class=HTMLResponse)
+async def generate_article_summary(
+    request: Request,
+    article_id: str,
+    db: Session = Depends(deps.get_db),
+    current_user: models.User = Depends(  # pylint: disable=unused-argument
+        deps.get_current_active_user
+    ),
+) -> Response:
+    """
+    Generate Article Summary
+
+    Args:
+        request(Request): The request object
+        article_id(str): The article id
+        db(Session): The database session.
+        current_user(User): The authenticated user.
+
+    Returns:
+        Response: View of the article
+    """
+    alerts = models.Alerts()
+
+    await generate_new_article_summary(db=db, article_id=article_id)
+
+    alerts.success.append("Article's summary was generated")
+
+    response = RedirectResponse(url="/article/{article_id}", status_code=status.HTTP_303_SEE_OTHER)
     response.set_cookie(key="alerts", value=alerts.json(), max_age=5, httponly=True)
     return response

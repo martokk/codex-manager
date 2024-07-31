@@ -3,6 +3,7 @@ from app import crud, models
 from sqlmodel import Session
 from typing import Dict, Optional, Any
 from app.services.worldanvil import get_articles_from_worldanvil
+from app.services.summarizer import generate_brief, generate_summary, generate_date_range
 
 
 async def import_articles_from_worldanvil():
@@ -36,6 +37,10 @@ async def get_existing_article(db: Session, article_id: str) -> Optional[models.
 
 async def create_new_article(db: Session, article: Dict[str, Any]) -> None:
     """Create a new article in the database"""
+    summary = generate_summary(article["content"])
+    brief = generate_brief(article["content"])
+    year_start, year_end = generate_date_range(article["content"])
+
     new_article = models.ArticleCreate(
         id=article["id"],
         title=article["title"],
@@ -43,6 +48,10 @@ async def create_new_article(db: Session, article: Dict[str, Any]) -> None:
         tags=article["tags"],
         template=article.get("template"),
         category=article.get("category"),
+        summary=summary,
+        brief=brief,
+        year_start=year_start,
+        year_end=year_end,
     )
     await crud.article.create(db=db, obj_in=new_article)
     print(f"Added new article: {article['title']}")
@@ -103,6 +112,7 @@ async def create_review(
     """Create a review for the article"""
     new_summary = generate_summary(new_article["content"])
     new_brief = generate_brief(new_article["content"])
+    new_year_start, new_year_end = generate_date_range(new_article["content"])
 
     review = models.ReviewCreate(
         article_id=new_article["id"],
@@ -110,6 +120,10 @@ async def create_review(
         new_summary=new_summary,
         old_brief=existing_article.brief,
         new_brief=new_brief,
+        old_year_start=existing_article.year_start,
+        new_year_start=new_year_start,
+        old_year_end=existing_article.year_end,
+        new_year_end=new_year_end,
     )
     await crud.review.create(db=db, obj_in=review)
     print(f"Added review for: {new_article['title']}")
@@ -124,13 +138,24 @@ async def update_article(
     print(f"Updated existing article: {new_article['title']}")
 
 
-def generate_summary(content: str) -> str:
-    # Implement your summary generation logic here
-    # This is a placeholder implementation
-    return content[:200] + "..."
+async def generate_new_article_summary(
+    db: Session,
+    article_id: str,
+) -> models.Article:
+    """Generate a summary for the article and update the article"""
 
+    existing_article = await crud.article.get(db=db, id=article_id)
 
-def generate_brief(content: str) -> str:
-    # Implement your brief generation logic here
-    # This is a placeholder implementation
-    return content[:100] + "..."
+    if not existing_article.text:
+        raise Exception("No Article Text is found")
+
+    new_summary = generate_summary(text=existing_article.text)
+
+    article_update = models.ArticleUpdate(
+        summary=new_summary,
+    )
+    updated_article = await crud.article.update(
+        db=db, db_obj=existing_article, obj_in=article_update
+    )
+    print(f"Updated article summary: {updated_article.title}")
+    return updated_article

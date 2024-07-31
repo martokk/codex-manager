@@ -51,6 +51,8 @@ sqlmodel = "^0.0.8"
 types-pyyaml = "^6.0.12.8"
 types-attrs = "^19.1.0"
 beautifulsoup4 = "^4.12.3"
+tenacity = "^9.0.0"
+anthropic = "^0.32.0"
 
 
 [tool.poetry.group.dev.dependencies]
