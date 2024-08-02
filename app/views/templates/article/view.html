@@ -7,8 +7,8 @@
     <h3>{{ article.title }}</h3>
     <div>
         <a href="/article/{{ article.id }}/generate-summary" class="btn btn-primary">Generate Summary</a>
-        <a href="#" class="btn btn-primary">Generate Brief</a>
-        <a href="#" class="btn btn-primary">Generate Dates</a>
+        <a href="/article/{{ article.id }}/generate-brief" class="btn btn-primary">Generate Brief</a>
+        <a href="/article/{{ article.id }}/generate-date-range" class="btn btn-primary">Generate Date Range</a>
     </div>
 </div>
 {% endblock %}
@@ -38,26 +38,30 @@
                     {% elif article.year_end %}
                     Until {{ article.year_end }}
                     {% else %}
-                    Not specified
+                    N/A
                     {% endif %}
                 </div>
             </div>
             <div class="row mb-2">
                 <div class="col-4 font-weight-bold">Tags:</div>
-                <div class="col-8">{{ article.tags|join(', ') if article.tags else 'No tags' }}</div>
+                <div class="col-8">{{ article.tags|join(', ') if article.tags else 'N/A' }}</div>
             </div>
-            <div class="row mb-2">
-                <div class="col-4 font-weight-bold">Full Text:</div>
-                <div class="col-8">{{ article.text|truncate(200) if article.text else 'No full text available' }}</div>
-            </div>
-            <div class="row mb-2">
-                <div class="col-4 font-weight-bold">Summary:</div>
-                <div class="col-8">{{ article.summary if article.summary else 'No summary available' }}</div>
-            </div>
+
             <div class="row mb-2">
                 <div class="col-4 font-weight-bold">Brief:</div>
-                <div class="col-8">{{ article.brief if article.brief else 'No brief available' }}</div>
+                <div class="col-8">{{ article.brief | nl2br | safe }}</div>
             </div>
+
+            <div class="row mb-2">
+                <div class="col-4 font-weight-bold">Summary:</div>
+                <div class="col-8">{{ article.summary | nl2br | safe }}</div>
+            </div>
+
+            <div class="row mb-2">
+                <div class="col-4 font-weight-bold">Full Text:</div>
+                <div class="col-8">{{ article.text | nl2br | safe }}</div>
+            </div>
+
             <div class="row mb-2">
                 <div class="col-4 font-weight-bold">Owner:</div>
                 <div class="col-8">{{ article.owner_id }}</div>

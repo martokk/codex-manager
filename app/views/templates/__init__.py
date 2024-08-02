@@ -2,7 +2,7 @@ from fastapi.templating import Jinja2Templates
 
 from app import paths
 from app.models.settings import Settings as _Settings
-from app.views.templates.filters import filter_humanize
+from app.views.templates.filters import filter_humanize, nl2br
 
 settings = _Settings()  # type: ignore
 
@@ -19,6 +19,7 @@ def get_templates() -> Jinja2Templates:
 
     # Add custom filters to templates
     templates.env.filters["humanize"] = filter_humanize
+    templates.env.filters["nl2br"] = nl2br
 
     # Add global variables to templates
     templates.env.globals["PROJECT_NAME"] = settings.PROJECT_NAME
@@ -30,3 +31,5 @@ def get_templates() -> Jinja2Templates:
     templates.env.globals["VERSION"] = settings.VERSION
 
     return templates
+
+    # Custom Jinja2 Environment

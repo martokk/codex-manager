@@ -5,7 +5,13 @@ from sqlmodel import Session
 
 from app import crud, models
 from app.views import deps, templates
-from app.services.articles import generate_new_article_summary, import_articles_from_worldanvil
+from app.services.articles import (
+    generate_all_ai_text,
+    generate_new_article_brief,
+    generate_new_article_date_range,
+    generate_new_article_summary,
+    import_articles_from_worldanvil,
+)
 
 router = APIRouter()
 
@@ -68,6 +74,37 @@ async def list_all_articles(
         "article/list.html",
         {"request": request, "articles": articles, "current_user": current_user, "alerts": alerts},
     )
+
+
+@router.post("/articles/generate-ai-text", response_class=HTMLResponse)
+async def generate_ai_text_for_all_articles(
+    request: Request,
+    db: Session = Depends(deps.get_db),
+    current_user: models.User = Depends(  # pylint: disable=unused-argument
+        deps.get_current_active_superuser
+    ),
+) -> Response:
+    """
+    Returns HTML response with list of all articles from all users.
+
+    Args:
+        request(Request): The request object
+        db(Session): The database session.
+        current_user(User): The authenticated superuser.
+
+    Returns:
+        Response: HTML page with the articles
+
+    """
+    alerts = models.Alerts()
+
+    await generate_all_ai_text(db=db)
+
+    alerts.success.append("Generating ai text for all articles.")
+
+    response = RedirectResponse(url="/articles", status_code=status.HTTP_303_SEE_OTHER)
+    response.set_cookie(key="alerts", value=alerts.json(), max_age=5, httponly=True)
+    return response
 
 
 @router.get("/article/{article_id}", response_class=HTMLResponse)
@@ -363,6 +400,70 @@ async def generate_article_summary(
     await generate_new_article_summary(db=db, article_id=article_id)
 
     alerts.success.append("Article's summary was generated")
+
+    response = RedirectResponse(url="/article/{article_id}", status_code=status.HTTP_303_SEE_OTHER)
+    response.set_cookie(key="alerts", value=alerts.json(), max_age=5, httponly=True)
+    return response
+
+
+@router.get("/article/{article_id}/generate-brief", response_class=HTMLResponse)
+async def generate_article_brief(
+    request: Request,
+    article_id: str,
+    db: Session = Depends(deps.get_db),
+    current_user: models.User = Depends(  # pylint: disable=unused-argument
+        deps.get_current_active_user
+    ),
+) -> Response:
+    """
+    Generate Article brief
+
+    Args:
+        request(Request): The request object
+        article_id(str): The article id
+        db(Session): The database session.
+        current_user(User): The authenticated user.
+
+    Returns:
+        Response: View of the article
+    """
+    alerts = models.Alerts()
+
+    await generate_new_article_brief(db=db, article_id=article_id)
+
+    alerts.success.append("Article's brief was generated")
+
+    response = RedirectResponse(url="/article/{article_id}", status_code=status.HTTP_303_SEE_OTHER)
+    response.set_cookie(key="alerts", value=alerts.json(), max_age=5, httponly=True)
+    return response
+
+
+@router.get("/article/{article_id}/generate-date-range", response_class=HTMLResponse)
+async def generate_article_brief(
+    request: Request,
+    article_id: str,
+    db: Session = Depends(deps.get_db),
+    current_user: models.User = Depends(  # pylint: disable=unused-argument
+        deps.get_current_active_user
+    ),
+) -> Response:
+    """
+    Generate Article date range
+
+    Args:
+        request(Request): The request object
+        article_id(str): The article id
+        db(Session): The database session.
+        current_user(User): The authenticated user.
+
+    Returns:
+        Response: View of the article
+    """
+    alerts = models.Alerts()
+
+    await generate_new_article_date_range(db=db, article_id=article_id)
+
+    alerts.success.append("Article's date range was generated")
 
     response = RedirectResponse(url="/article/{article_id}", status_code=status.HTTP_303_SEE_OTHER)
     response.set_cookie(key="alerts", value=alerts.json(), max_age=5, httponly=True)

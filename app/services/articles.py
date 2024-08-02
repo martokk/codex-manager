@@ -1,5 +1,5 @@
 from app.views.deps import get_db
-from app import crud, models
+from app import crud, models, logger
 from sqlmodel import Session
 from typing import Dict, Optional, Any
 from app.services.worldanvil import get_articles_from_worldanvil
@@ -14,7 +14,7 @@ async def import_articles_from_worldanvil():
     for article in imported_articles:
         await process_imported_article(db, article)
 
-    print("Import process completed")
+    logger.success(f"World Anvil import complete")
 
 
 async def process_imported_article(db: Session, article: Dict[str, Any]) -> None:
@@ -54,7 +54,7 @@ async def create_new_article(db: Session, article: Dict[str, Any]) -> None:
         year_end=year_end,
     )
     await crud.article.create(db=db, obj_in=new_article)
-    print(f"Added new article: {article['title']}")
+    logger.success(f"Added new article: {article['title']}")
 
 
 async def update_existing_article(
@@ -64,7 +64,7 @@ async def update_existing_article(
     if has_article_changed(existing_article, new_article):
         if needs_review(existing_article, new_article):
             await create_review(db, existing_article, new_article)
-            print(f"Article sent for review: {existing_article.title}")
+            logger.info(f"Article sent for review: {existing_article.title}")
             return existing_article
 
         article_update = models.ArticleUpdate(
@@ -78,10 +78,10 @@ async def update_existing_article(
         updated_article = await crud.article.update(
             db=db, db_obj=existing_article, obj_in=article_update
         )
-        print(f"Updated existing article: {updated_article.title}")
+        logger.success(f"Article sent for review: {existing_article.title}")
         return updated_article
     else:
-        print(f"No changes for: {existing_article.title}")
+        logger.info(f"No changes for: {existing_article.title}")
         return existing_article
 
 
@@ -126,7 +126,7 @@ async def create_review(
         new_year_end=new_year_end,
     )
     await crud.review.create(db=db, obj_in=review)
-    print(f"Added review for: {new_article['title']}")
+    logger.info(f"Added review for: {new_article['title']}")
 
 
 async def update_article(
@@ -135,7 +135,7 @@ async def update_article(
     """Update the existing article in the database"""
     article_update = models.ArticleUpdate(text=new_article["content"], tags=new_article["tags"])
     await crud.article.update(db=db, db_obj=existing_article, obj_in=article_update)
-    print(f"Updated existing article: {new_article['title']}")
+    logger.success(f"Updated existing article: {new_article['title']}")
 
 
 async def generate_new_article_summary(
@@ -147,7 +147,7 @@ async def generate_new_article_summary(
     existing_article = await crud.article.get(db=db, id=article_id)
 
     if not existing_article.text:
-        raise Exception("No Article Text is found")
+        return existing_article
 
     new_summary = generate_summary(text=existing_article.text)
 
@@ -155,7 +155,79 @@ async def generate_new_article_summary(
         summary=new_summary,
     )
     updated_article = await crud.article.update(
-        db=db, db_obj=existing_article, obj_in=article_update
+        db=db, id=existing_article.id, obj_in=article_update
     )
-    print(f"Updated article summary: {updated_article.title}")
+    logger.success(f"Updated article summary: {updated_article.title}")
     return updated_article
+
+
+async def generate_new_article_brief(
+    db: Session,
+    article_id: str,
+) -> models.Article:
+    """Generate a summary for the article and update the article"""
+
+    existing_article = await crud.article.get(db=db, id=article_id)
+
+    if not existing_article.text:
+        return existing_article
+
+    new_brief = generate_brief(text=existing_article.text)
+
+    article_update = models.ArticleUpdate(
+        brief=new_brief,
+    )
+    updated_article = await crud.article.update(
+        db=db, id=existing_article.id, obj_in=article_update
+    )
+    logger.success(f"Updated article brief: {updated_article.title}")
+
+    return updated_article
+
+
+async def generate_new_article_date_range(
+    db: Session,
+    article_id: str,
+) -> models.Article:
+    """Generate a summary for the article and update the article"""
+
+    existing_article = await crud.article.get(db=db, id=article_id)
+
+    if not existing_article.text:
+        return existing_article
+
+    new_year_start, new_year_end = generate_date_range(text=existing_article.text)
+
+    article_update = models.ArticleUpdate(year_start=new_year_start, year_end=new_year_end)
+    updated_article = await crud.article.update(
+        db=db, id=existing_article.id, obj_in=article_update
+    )
+    logger.success(f"Updated article date range: {updated_article.title}")
+
+    return updated_article
+
+
+async def generate_all_ai_text(
+    db: Session,
+) -> None:
+    """Generate a summary for the article and update the article"""
+
+    articles = await crud.article.get_all(db=db)
+
+    for article in articles:
+        if article.brief and article.summary and article.year_start and article.year_end:
+            logger.info(
+                f"Article '{article.title}' already has AI text. Continuing to next article"
+            )
+            continue
+
+        if not article.brief:
+            await generate_new_article_brief(db=db, article_id=article.id)
+
+        if not article.summary:
+            await generate_new_article_summary(db=db, article_id=article.id)
+
+        if not article.year_start or not article.year_end:
+            await generate_new_article_date_range(db=db, article_id=article.id)
+
+        logger.success(f"Updated all AI text for '{article.title}' article.")
