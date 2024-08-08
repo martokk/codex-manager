@@ -2,28 +2,59 @@
 
 {% block title %} Articles ({{ articles|length }}){% endblock %}
 
-{% block content_header %}Articles ({{ articles|length }}){% endblock %}
+{% block content_header %}
+<div class="d-flex justify-content-between align-items-center">
+    <span>Articles ({{ articles|length }})</span>
+    <form action="/import-articles" method="post">
+        <button type="submit" class="btn btn-primary">Import</button>
+    </form>
+    <form action="/articles/generate-ai-text" method="post">
+        <button type="submit" class="btn btn-primary">Generate All AI Text</button>
+    </form>
+</div>
+{% endblock %}
 
 {% block content %}
 <div class="container">
     <table class="table table-hover table-sm">
         <thead>
             <tr>
-                <th scope="col" class="w-75">Title</th>
-                <th scope="col" class="d-none d-md-table-cell w-25">Description</th>
-                <th scope="col" class="w-auto"></th>
+                <th scope="col" class="w-20">Title</th>
+                <th scope="col" class="d-none d-md-table-cell w-15">Year Range</th>
+                <th scope="col" class="d-none d-md-table-cell w-20">Tags</th>
+                <th scope="col" class="d-none d-md-table-cell w-15">Category</th>
+                <th scope="col" class="d-none d-md-table-cell w-15">Template</th>
+                <th scope="col" class="w-15"></th>
             </tr>
         </thead>
         <tbody>
-
             {% for article in articles %}
             <tr>
                 <td class="">
                     <a href="/article/{{ article.id }}" class="">{{ article.title }}</a>
                 </td>
-
-                <td class="">{{ article.description }}</td>
-
+                <td class="d-none d-md-table-cell">
+                    {% if article.year_start and article.year_end %}
+                    {{ article.year_start }} - {{ article.year_end }}
+                    {% elif article.year_start %}
+                    From {{ article.year_start }}
+                    {% elif article.year_end %}
+                    Until {{ article.year_end }}
+                    {% endif %}
+                </td>
+                <td class="d-none d-md-table-cell">
+                    {% if article.tags %}
+                    {{ article.tags|join(', ') }}
+                    {% else %}
+                    No tags
+                    {% endif %}
+                </td>
+                <td class="d-none d-md-table-cell">
+                    {{ article.category if article.category else 'N/A' }}
+                </td>
+                <td class="d-none d-md-table-cell">
+                    {{ article.template if article.template else 'N/A' }}
+                </td>
                 <td class="">
                     <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-dark btn-transparent dropdown-toggle"
@@ -36,10 +67,8 @@
                         </div>
                     </div>
                 </td>
-
             </tr>
             {% endfor %}
-
         </tbody>
     </table>
 </div>

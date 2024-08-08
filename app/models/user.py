@@ -5,9 +5,6 @@ from sqlmodel import Field, Relationship, SQLModel
 
 from app.core.uuid import generate_uuid_from_string
 
-if TYPE_CHECKING:
-    from app.models.article import Article  # pragma: no cover
-
 
 class UserBase(SQLModel):
     id: str = Field(
@@ -25,12 +22,6 @@ class UserBase(SQLModel):
 
 class User(UserBase, table=True):
     hashed_password: str = Field(nullable=False)
-    articles: list["Article"] = Relationship(
-        back_populates="owner",
-        sa_relationship_kwargs={
-            "cascade": "all, delete",
-        },
-    )
 
 
 class UserCreate(UserBase):

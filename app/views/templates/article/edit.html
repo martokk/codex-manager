@@ -4,7 +4,6 @@
 
 {% block content_header %}Edit Article{% endblock %}
 
-
 {% block content %}
 <div class="container">
     <div class="card">
@@ -24,14 +23,37 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="description">Description:</label>
-                    <textarea class="form-control mb-3" id="description" rows="3"
-                        name="description">{{ article.description }}</textarea>
+                    <label for="year_start">Start Year:</label>
+                    <input type="number" class="form-control mb-3" id="year_start" name="year_start"
+                        value="{{ article.year_start }}">
                 </div>
 
                 <div class="form-group">
-                    <label for="url">URL:</label>
-                    <input type="text" class="form-control mb-3" id="url" name="url" value="{{ article.url }}">
+                    <label for="year_end">End Year:</label>
+                    <input type="number" class="form-control mb-3" id="year_end" name="year_end"
+                        value="{{ article.year_end }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="tags">Tags:</label>
+                    <input type="text" class="form-control mb-3" id="tags" name="tags"
+                        value="{{ article.tags|join(', ') if article.tags else '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="text">Full Text:</label>
+                    <textarea class="form-control mb-3" id="text" rows="5" name="text">{{ article.text }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="summary">Summary:</label>
+                    <textarea class="form-control mb-3" id="summary" rows="3"
+                        name="summary">{{ article.summary }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="brief">Brief:</label>
+                    <textarea class="form-control mb-3" id="brief" rows="2" name="brief">{{ article.brief }}</textarea>
                 </div>
 
                 <div class="form-group">
@@ -47,5 +69,4 @@
         </div>
     </div>
 </div>
-
 {% endblock content %}

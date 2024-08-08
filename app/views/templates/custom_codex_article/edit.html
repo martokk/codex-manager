@@ -1,0 +1,48 @@
+{% extends "base/base.html" %}
+
+{% block title %}Edit Custom Codex Article{% endblock %}
+
+{% block content_header %}Edit Article in {{ custom_codex_article.custom_codex.name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            Custom Codex Article Details
+        </div>
+        <div class="card-body p-4">
+            <form method="POST">
+                <div class="form-group">
+                    <label for="article">Article:</label>
+                    <input type="text" class="form-control mb-3" id="article" name="article"
+                        value="{{ custom_codex_article.article.title }}" disabled>
+                </div>
+
+                <div class="form-group">
+                    <label for="article_type">Type:</label>
+                    <select class="form-control mb-3" id="article_type" name="article_type">
+                        <option value="None" {% if custom_codex_article.article_type=="None" %}selected{% endif %}>None
+                        </option>
+                        <option value="Full" {% if custom_codex_article.article_type=="Full" %}selected{% endif %}>Full
+                        </option>
+                        <option value="Brief" {% if custom_codex_article.article_type=="Brief" %}selected{% endif %}>
+                            Brief</option>
+                        <option value="Custom" {% if custom_codex_article.article_type=="Custom" %}selected{% endif %}>
+                            Custom</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="custom_text">Custom Text:</label>
+                    <textarea class="form-control mb-3" id="custom_text" name="custom_text"
+                        rows="5">{{ custom_codex_article.custom_text }}</textarea>
+                </div>
+
+                <div class="d-flex justify-content-end mt-3">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock content %}

@@ -1,0 +1,48 @@
+{% extends "base/base.html" %}
+
+{% block title %}Create a New Custom Codex{% endblock %}
+
+{% block content_header %}Create a New Custom Codex{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="card">
+        <div class="card-body">
+            <form method="POST">
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" class="form-control" id="name" name="name" placeholder="Enter name">
+                </div>
+
+                <div class="form-group mt-3">
+                    <label for="context_length">Context Length:</label>
+                    <input type="number" class="form-control" id="context_length" name="context_length"
+                        placeholder="Enter context length">
+                </div>
+
+                <div class="form-group mt-3">
+                    <label for="year_start">Start Year:</label>
+                    <input type="number" class="form-control" id="year_start" name="year_start"
+                        placeholder="Enter start year">
+                </div>
+
+                <div class="form-group mt-3">
+                    <label for="year_end">End Year:</label>
+                    <input type="number" class="form-control" id="year_end" name="year_end"
+                        placeholder="Enter end year">
+                </div>
+
+                <div class="form-group mt-3">
+                    <label for="tags">Tags:</label>
+                    <input type="text" class="form-control" id="tags" name="tags"
+                        placeholder="Enter tags (comma-separated)">
+                </div>
+
+                <div class="d-flex justify-content-end mt-3">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock content %}

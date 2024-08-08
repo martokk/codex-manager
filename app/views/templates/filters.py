@@ -44,3 +44,7 @@ def filter_humanize(dt: datetime) -> str:
     if day_diff < 365:
         return str(int(day_diff / 30)) + " months ago"
     return str(int(day_diff / 365)) + " years ago"
+
+
+def nl2br(value: str) -> str:
+    return value.replace("\n", "<br>")

@@ -1,0 +1,35 @@
+{% extends "base/base.html" %}
+
+{% block title %}View Custom Codex Article{% endblock %}
+
+{% block content_header %}{{ custom_codex_article.article.title }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">{{ custom_codex_article.article.title }}</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-4 font-weight-bold">Codex:</div>
+                <div class="col-8">{{ custom_codex_article.custom_codex.name }}</div>
+            </div>
+            <div class="row">
+                <div class="col-4 font-weight-bold">Article:</div>
+                <div class="col-8">{{ custom_codex_article.article.title }}</div>
+            </div>
+            <div class="row">
+                <div class="col-4 font-weight-bold">Type:</div>
+                <div class="col-8">{{ custom_codex_article.article_type }}</div>
+            </div>
+            {% if custom_codex_article.custom_text %}
+            <div class="row">
+                <div class="col-4 font-weight-bold">Custom Text:</div>
+                <div class="col-8">{{ custom_codex_article.custom_text }}</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock content %}

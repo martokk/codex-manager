@@ -11,27 +11,62 @@
             <form method="POST">
                 <div class="form-group">
                     <label for="title">Title:</label>
-                    <input type="text" class="form-control" id="title" name="title" placeholder="Enter title">
+                    <input type="text" class="form-control" id="title" name="title" placeholder="Enter title" required>
                 </div>
 
                 <div class="form-group mt-3">
-                    <label for="description">Description:</label>
-                    <textarea class="form-control" id="description" rows="3" name="description"
-                        placeholder="Enter description"></textarea>
+                    <label for="year_start">Start Year:</label>
+                    <input type="number" class="form-control" id="year_start" name="year_start"
+                        placeholder="Enter start year">
                 </div>
 
                 <div class="form-group mt-3">
-                    <label for="url">URL:</label>
-                    <input type="text" class="form-control" id="url" name="url" placeholder="Enter URL">
+                    <label for="year_end">End Year:</label>
+                    <input type="number" class="form-control" id="year_end" name="year_end"
+                        placeholder="Enter end year">
+                </div>
+
+                <div class="form-group mt-3">
+                    <label for="category">Category:</label>
+                    <input type="text" class="form-control" id="category" name="category"
+                        placeholder="Enter category">
+                </div>
+
+                <div class="form-group mt-3">
+                    <label for="template">Template:</label>
+                    <input type="text" class="form-control" id="template" name="template"
+                        placeholder="Enter template">
+                </div>
+
+                <div class="form-group mt-3">
+                    <label for="tags">Tags:</label>
+                    <input type="text" class="form-control" id="tags" name="tags"
+                        placeholder="Enter tags (comma-separated)">
+                </div>
+
+                <div class="form-group mt-3">
+                    <label for="text">Full Text:</label>
+                    <textarea class="form-control" id="text" rows="5" name="text"
+                        placeholder="Enter full text"></textarea>
+                </div>
+
+                <div class="form-group mt-3">
+                    <label for="summary">Summary:</label>
+                    <textarea class="form-control" id="summary" rows="3" name="summary"
+                        placeholder="Enter summary"></textarea>
+                </div>
+
+                <div class="form-group mt-3">
+                    <label for="brief">Brief:</label>
+                    <textarea class="form-control" id="brief" rows="2" name="brief"
+                        placeholder="Enter brief"></textarea>
                 </div>
 
                 <div class="d-flex justify-content-end mt-3">
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </div>
-
             </form>
         </div>
     </div>
 </div>
-
 {% endblock content %}
