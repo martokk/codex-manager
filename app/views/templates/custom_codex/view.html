@@ -33,7 +33,7 @@
             </div>
             <div class="row">
                 <div class="col-4 font-weight-bold">Tags:</div>
-                <div class="col-8">{{ custom_codex.tags|join(', ') }}</div>
+                <div class="col-8">{{ custom_codex.tags|join(', ') if custom_codex.tags is not none else ""}}</div>
             </div>
         </div>
     </div>

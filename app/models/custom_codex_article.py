@@ -1,8 +1,8 @@
-from typing import TYPE_CHECKING, Optional, List
+from typing import TYPE_CHECKING, Any, Optional, List
 from datetime import datetime
 from pydantic import root_validator
 from sqlmodel import Field, Relationship, SQLModel
-from app.core.uuid import generate_uuid_from_url
+from app.core.uuid import generate_uuid_from_url, generate_uuid_random
 from .common import TimestampModel
 
 if TYPE_CHECKING:
@@ -24,7 +24,12 @@ class CustomCodexArticle(CustomCodexArticleBase, table=True):
 
 
 class CustomCodexArticleCreate(CustomCodexArticleBase):
-    pass
+
+    @root_validator(pre=True)
+    @classmethod
+    def set_pre_validation_defaults(cls, values: dict[str, Any]) -> dict[str, Any]:
+        values["id"] = values.get("id", generate_uuid_random())
+        return values
 
 
 class CustomCodexArticleUpdate(CustomCodexArticleBase):

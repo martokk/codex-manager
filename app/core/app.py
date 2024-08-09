@@ -42,7 +42,7 @@ async def on_startup(db: Session = next(deps.get_db())) -> None:
     await init_initial_data(db=db)
 
 
-@app.on_event("startup")  # type: ignore
-@repeat_every(seconds=120, wait_first=False)
-async def repeating_task() -> None:
-    logger.debug("This is a repeating task example that runs every 120 seconds.")
+# @app.on_event("startup")  # type: ignore
+# @repeat_every(seconds=120, wait_first=False)
+# async def repeating_task() -> None:
+#     logger.debug("This is a repeating task example that runs every 120 seconds.")

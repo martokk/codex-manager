@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "codex_manager"
-version = "0.0.3"
+version = "0.0.4"
 description = "A python project."
 readme = "README.md"
 authors = ["martokk <25113632+martokk@users.noreply.github.com>"]
@@ -53,6 +53,7 @@ types-attrs = "^19.1.0"
 beautifulsoup4 = "^4.12.3"
 tenacity = "^9.0.0"
 anthropic = "^0.32.0"
+transformers = "^4.44.0"
 
 
 [tool.poetry.group.dev.dependencies]
