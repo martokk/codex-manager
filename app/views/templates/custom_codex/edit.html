@@ -57,33 +57,48 @@
                     <div class="article-row" data-article-id="{{ article.id }}">
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="article-title" title="{{ article.brief }}">{{ article.title }}</span>
-                            <div class="btn-group btn-group-sm" role="group">
-                                <input type="radio" class="btn-check" name="article_types_{{ article.id }}" id="none_{{ article.id }}"
-                                    value="None" {% if article_types_dict.get(article.id)=='None' %}checked{% endif %}>
-                                <label class="btn btn-outline-secondary" for="none_{{ article.id }}">None</label>
+                            <div class="d-flex align-items-center">
+                                <span class="year-range me-3">({{ article.year_start }}-{{ article.year_end }})</span>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <input type="radio" class="btn-check" name="article_types_{{ article.id }}"
+                                        id="none_{{ article.id }}" value="None" {% if article_types_dict.get(article.id)=='None'
+                                        %}checked{% endif %}>
+                                    <label class="btn btn-outline-secondary" for="none_{{ article.id }}">None</label>
                 
-                                <input type="radio" class="btn-check" name="article_types_{{ article.id }}" id="full_{{ article.id }}"
-                                    value="Full" {% if article_types_dict.get(article.id)=='Full' or not
-                                    article_types_dict.get(article.id) %}checked{% endif %}>
-                                <label class="btn btn-outline-secondary" for="full_{{ article.id }}">Full</label>
+                                    <input type="radio" class="btn-check" name="article_types_{{ article.id }}"
+                                        id="full_{{ article.id }}" value="Full" {% if article_types_dict.get(article.id)=='Full' or not
+                                        article_types_dict.get(article.id) %}checked{% endif %}>
+                                    <label class="btn btn-outline-secondary" for="full_{{ article.id }}">Full</label>
                 
-                                <input type="radio" class="btn-check" name="article_types_{{ article.id }}"
-                                    id="summary_{{ article.id }}" value="Summary" {% if article_types_dict.get(article.id)=='Summary'
-                                    %}checked{% endif %}>
-                                <label class="btn btn-outline-secondary" for="summary_{{ article.id }}">Summary</label>
+                                    <input type="radio" class="btn-check" name="article_types_{{ article.id }}"
+                                        id="summary_{{ article.id }}" value="Summary" {% if
+                                        article_types_dict.get(article.id)=='Summary' %}checked{% endif %}>
+                                    <label class="btn btn-outline-secondary" for="summary_{{ article.id }}">Summary</label>
                 
-                                <input type="radio" class="btn-check" name="article_types_{{ article.id }}" id="brief_{{ article.id }}"
-                                    value="Brief" {% if article_types_dict.get(article.id)=='Brief' %}checked{% endif %}>
-                                <label class="btn btn-outline-secondary" for="brief_{{ article.id }}">Brief</label>
+                                    <input type="radio" class="btn-check" name="article_types_{{ article.id }}"
+                                        id="brief_{{ article.id }}" value="Brief" {% if article_types_dict.get(article.id)=='Brief'
+                                        %}checked{% endif %}>
+                                    <label class="btn btn-outline-secondary" for="brief_{{ article.id }}">Brief</label>
                 
-                                <input type="radio" class="btn-check" name="article_types_{{ article.id }}" id="custom_{{ article.id }}"
-                                    value="Custom" {% if article_types_dict.get(article.id)=='Custom' %}checked{% endif %}>
-                                <label class="btn btn-outline-secondary" for="custom_{{ article.id }}">Custom</label>
+                                    <input type="radio" class="btn-check" name="article_types_{{ article.id }}"
+                                        id="custom_{{ article.id }}" value="Custom" {% if article_types_dict.get(article.id)=='Custom'
+                                        %}checked{% endif %}>
+                                    <label class="btn btn-outline-secondary" for="custom_{{ article.id }}">Custom</label>
+                                </div>
                             </div>
                         </div>
-                        <div class="article-info mt-1">
-                            <small>({{ article.year_start }}-{{ article.year_end }}, Tags: {{ article.tags|join(', ')
-                                }})</small>
+                        <div class="article-info mt-2">
+                            <div class="tags">
+                                {% for tag in article.tags %}
+                                <span class="badge bg-secondary me-1">{{ tag }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="custom-text mt-2" style="display: none;">
+                            <textarea class="form-control" name="custom_text_{{ article.id }}" rows="3"
+                                placeholder="Enter custom text"></textarea>
+                            <button type="button" class="btn btn-sm btn-outline-primary mt-2"
+                                onclick="generateCustomText('{{ article.id }}')">Generate Custom Text</button>
                         </div>
                     </div>
                     {% endfor %}
@@ -123,48 +138,38 @@
 </style>
 
 <script>
-    function setAllArticles(type) {
-        document.querySelectorAll('.article-row').forEach(row => {
-            const radio = row.querySelector(`input[value="${type}"]`);
-            if (radio) {
-                radio.checked = true;
-            }
-        });
-        updateContextLength();
+    <script>
+            function setAllArticles(type) {
+                document.querySelectorAll('.article-row').forEach(row => {
+                    const radio = row.querySelector(`input[value="${type}"]`);
+                    if (radio) {
+                        radio.checked = true;
+                    }
+                    toggleCustomText(row, type === 'Custom');
+                });
+            updateContextLength();
     }
 
-    async function updateContextLength() {
-        const articleTypes = {};
-        document.querySelectorAll('.article-row').forEach(row => {
-            const articleId = row.dataset.articleId;
-            const selectedType = row.querySelector('input[name^="article_types_"]:checked').value;
-            articleTypes[articleId] = selectedType;
-        });
+            function toggleCustomText(row, show) {
+        const customTextDiv = row.querySelector('.custom-text');
+            customTextDiv.style.display = show ? 'block' : 'none';
+    }
 
-        try {
-            const response = await fetch(`/custom_codex/{{ custom_codex.id }}/calculate_context_length`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ article_types: articleTypes }),
-            });
-            const data = await response.json();
-            document.getElementById('currentContextLength').textContent = data.context_length;
-
-            const maxLength = parseInt(document.getElementById('maxContextLength').textContent);
-            if (data.context_length > maxLength) {
-                document.getElementById('currentContextLength').style.color = 'red';
-            } else {
-                document.getElementById('currentContextLength').style.color = 'inherit';
+            async function updateContextLength() {
+                // ... (keep the existing updateContextLength function) ...
             }
-        } catch (error) {
-            console.error('Error updating context length:', error);
-        }
+
+            function generateCustomText(articleId) {
+                // Implement the logic to generate custom text
+                alert(`Generating custom text for article ${articleId}`);
+        // You can replace this with an actual API call to generate text
     }
 
     document.querySelectorAll('input[name^="article_types_"]').forEach(radio => {
-        radio.addEventListener('change', updateContextLength);
+                radio.addEventListener('change', function () {
+                    updateContextLength();
+                    toggleCustomText(this.closest('.article-row'), this.value === 'Custom');
+                });
     });
 
     document.getElementById('editForm').addEventListener('submit', async function (e) {
