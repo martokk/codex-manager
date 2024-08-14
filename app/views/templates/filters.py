@@ -47,4 +47,6 @@ def filter_humanize(dt: datetime) -> str:
 
 
 def nl2br(value: str) -> str:
+    if value is None:
+        return ""
     return value.replace("\n", "<br>")
