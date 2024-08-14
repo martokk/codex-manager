@@ -2,7 +2,12 @@
 
 {% block title %}Edit Custom Codex{% endblock %}
 
-{% block content_header %}Edit Custom Codex{% endblock %}
+{% block content_header %}
+<div class="d-flex justify-content-between align-items-center">
+    <h1>EDIT: {{ custom_codex.name }}</h1>
+    <a href="{{ url_for('view_custom_codex', codex_id=custom_codex.id) }}" class="btn btn-primary">View</a>
+</div>
+{% endblock %}
 
 {% block content %}
 <div class="container my-5">
@@ -138,63 +143,62 @@
 </style>
 
 <script>
-    <script>
-            function setAllArticles(type) {
-                document.querySelectorAll('.article-row').forEach(row => {
-                    const radio = row.querySelector(`input[value="${type}"]`);
-                    if (radio) {
-                        radio.checked = true;
-                    }
-                    toggleCustomText(row, type === 'Custom');
-                });
-            updateContextLength();
-    }
-
-            function toggleCustomText(row, show) {
-        const customTextDiv = row.querySelector('.custom-text');
-            customTextDiv.style.display = show ? 'block' : 'none';
-    }
-
-            async function updateContextLength() {
-                // ... (keep the existing updateContextLength function) ...
+    function setAllArticles(type) {
+        document.querySelectorAll('.article-row').forEach(row => {
+            const radio = row.querySelector(`input[value="${type}"]`);
+            if (radio) {
+                radio.checked = true;
             }
+            toggleCustomText(row, type === 'Custom');
+        });
+        updateContextLength();
+    }
 
-            function generateCustomText(articleId) {
-                // Implement the logic to generate custom text
-                alert(`Generating custom text for article ${articleId}`);
+    function toggleCustomText(row, show) {
+        const customTextDiv = row.querySelector('.custom-text');
+        customTextDiv.style.display = show ? 'block' : 'none';
+    }
+
+    async function updateContextLength() {
+        // ... (keep the existing updateContextLength function) ...
+    }
+
+    function generateCustomText(articleId) {
+        // Implement the logic to generate custom text
+        alert(`Generating custom text for article ${articleId}`);
         // You can replace this with an actual API call to generate text
     }
 
     document.querySelectorAll('input[name^="article_types_"]').forEach(radio => {
-                radio.addEventListener('change', function () {
-                    updateContextLength();
-                    toggleCustomText(this.closest('.article-row'), this.value === 'Custom');
-                });
+        radio.addEventListener('change', function () {
+            updateContextLength();
+            toggleCustomText(this.closest('.article-row'), this.value === 'Custom');
+        });
     });
 
     document.getElementById('editForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
-            const formData = new FormData(this);
+        e.preventDefault();
+        const formData = new FormData(this);
 
-            try {
-                const response = await fetch(this.action, {
-                    method: 'POST',
-                    body: formData
-                });
-                const result = await response.json();
+        try {
+            const response = await fetch(this.action, {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
 
-                if (result.success) {
-                    alert(result.message);
-                    // Optionally reload the page to show updated data
-                    window.location.reload();
-                } else {
-                    alert(result.message || 'Error saving changes. Please try again.');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred. Please try again.');
+            if (result.success) {
+                alert(result.message);
+                // Optionally reload the page to show updated data
+                window.location.href = "{{ url_for('view_custom_codex', codex_id=custom_codex.id) }}";
+            } else {
+                alert(result.message || 'Error saving changes. Please try again.');
             }
-        });
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        }
+    });
 
     // Add tooltips for article briefs (requires tippy.js)
     tippy('.article-title', {

@@ -19,7 +19,7 @@
             {% for codex in custom_codices %}
             <tr>
                 <td class="">
-                    <a href="/custom_codex/{{ codex.id }}/edit" class="">{{ codex.name }}</a>
+                    <a href="/custom_codex/{{ codex.id }}" class="">{{ codex.name }}</a>
                 </td>
                 <td class="">{{ codex.context_length }}</td>
                 <td class="">{{ codex.tags|join(', ') if codex.tags is not none else "" }}</td>

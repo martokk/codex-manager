@@ -36,23 +36,24 @@ async def view_custom_codex(
     codex_id: str,
     db: Session = Depends(deps.get_db),
     current_user: models.User = Depends(deps.get_current_active_user),
-) -> Response:
-    alerts = models.Alerts()
-    try:
-        custom_codex = await crud.custom_codex.get(db=db, id=codex_id)
-    except crud.RecordNotFoundError:
-        alerts.danger.append("Custom Codex not found")
-        response = RedirectResponse("/custom_codices", status_code=status.HTTP_303_SEE_OTHER)
-        response.set_cookie(key="alerts", value=alerts.json(), httponly=True, max_age=5)
-        return response
+) -> HTMLResponse:
+    custom_codex = await crud.custom_codex.get(db=db, id=codex_id)
+    if not custom_codex:
+        # Handle the case where the custom codex is not found
+        # You might want to redirect to an error page or the list of custom codices
+        pass
+
+    custom_codex_articles = await crud.custom_codex_article.get_multi_by_codex_id(
+        db=db, codex_id=codex_id
+    )
 
     return templates.TemplateResponse(
         "custom_codex/view.html",
         {
             "request": request,
             "custom_codex": custom_codex,
+            "custom_codex_articles": custom_codex_articles,
             "current_user": current_user,
-            "alerts": alerts,
         },
     )
 

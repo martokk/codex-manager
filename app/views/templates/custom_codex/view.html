@@ -2,40 +2,90 @@
 
 {% block title %}View Custom Codex{% endblock %}
 
-{% block content_header %}{{ custom_codex.name }}{% endblock %}
+{% block content_header %}
+<div class="d-flex justify-content-between align-items-center">
+    <h1>{{ custom_codex.name }}</h1>
+    <a href="{{ url_for('edit_custom_codex', codex_id=custom_codex.id) }}" class="btn btn-primary">Edit</a>
+</div>
+{% endblock %}
 
 {% block content %}
 <div class="container my-5">
-    <div class="card">
+    <div class="card mb-4">
         <div class="card-header">
             <h3 class="card-title">{{ custom_codex.name }}</h3>
         </div>
         <div class="card-body">
-            <div class="row">
+            <div class="row mb-2">
                 <div class="col-4 font-weight-bold">Id:</div>
-                <div class="col-8">{{ custom_codex.id }}</div>
+                <div class="col-8">{{ custom_codex.id if custom_codex.id else "" }}</div>
             </div>
-            <div class="row">
+            <div class="row mb-2">
                 <div class="col-4 font-weight-bold">Name:</div>
-                <div class="col-8">{{ custom_codex.name }}</div>
+                <div class="col-8">{{ custom_codex.name if custom_codex.name else "" }}</div>
             </div>
-            <div class="row">
+            <div class="row mb-2">
                 <div class="col-4 font-weight-bold">Context Length:</div>
-                <div class="col-8">{{ custom_codex.context_length }}</div>
+                <div class="col-8">{{ custom_codex.context_length if custom_codex.context_length else "" }}</div>
             </div>
-            <div class="row">
+            <div class="row mb-2">
                 <div class="col-4 font-weight-bold">Start Year:</div>
-                <div class="col-8">{{ custom_codex.year_start }}</div>
+                <div class="col-8">{{ custom_codex.year_start if custom_codex.year_start else "" }}</div>
             </div>
-            <div class="row">
+            <div class="row mb-2">
                 <div class="col-4 font-weight-bold">End Year:</div>
-                <div class="col-8">{{ custom_codex.year_end }}</div>
+                <div class="col-8">{{ custom_codex.year_end if custom_codex.year_end else "" }}</div>
             </div>
-            <div class="row">
+            <div class="row mb-2">
                 <div class="col-4 font-weight-bold">Tags:</div>
-                <div class="col-8">{{ custom_codex.tags|join(', ') if custom_codex.tags is not none else ""}}</div>
+                <div class="col-8">
+                    {% if custom_codex.tags %}
+                    {% for tag in custom_codex.tags %}
+                    <span class="badge bg-secondary me-1">{{ tag }}</span>
+                    {% endfor %}
+                    {% else %}
+                    
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
+
+    {% set non_none_articles = custom_codex_articles | selectattr("article_type", "ne", "None") | list %}
+    <h4 class="mb-3">Articles in Custom Codex ({{ non_none_articles | length }}/{{ custom_codex_articles | length }})</h4>
+
+    {% for article in custom_codex_articles %}
+    {% if article.article_type != 'None' %}
+    <div class="card mb-3">
+        <div class="card-header">
+            <h5 class="card-title">{{ article.article.title }}</h5>
+            <small class="text-muted">Type: {{ article.article_type }}</small>
+        </div>
+        <div class="card-body">
+            {% if article.article_type == 'Brief' %}
+            <p>{{ article.article.brief | nl2br | safe }}</p>
+            {% elif article.article_type == 'Summary' %}
+            <p>{{ article.article.summary | nl2br | safe }}</p>
+            {% elif article.article_type == 'Full' %}
+            <p>{{ article.article.text | nl2br | safe }}</p>
+            {% elif article.article_type == 'Custom' %}
+            <p>{{ article.custom_text | nl2br | safe }}</p>
+            {% endif %}
+            <div class="mt-2">
+                <small class="text-muted">
+                {% if article.article.year_start or article.article.year_end %}
+                    Years: {{ article.article.year_start }} - {{ article.article.year_end }}
+                {% endif %}
+                </small>
+            </div>
+            <div class="mt-1">
+                {% for tag in article.article.tags %}
+                <span class="badge bg-secondary me-1">{{ tag }}</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
 </div>
 {% endblock content %}
